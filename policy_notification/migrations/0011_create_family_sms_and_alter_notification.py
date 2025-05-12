@@ -10,6 +10,7 @@ defaults = get_default_notification_data()
 default_language = defaults['languageOfNotification']
 
 pssql_create_tblFamilySMS = """
+DROP TABLE IF EXISTS "tblFamilySMS";
 CREATE TABLE "tblFamilySMS" 
 ("ValidityFrom" timestamp with time zone NOT NULL,
 "ValidityTo" timestamp with time zone NULL,
