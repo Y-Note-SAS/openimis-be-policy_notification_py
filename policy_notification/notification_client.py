@@ -5,7 +5,7 @@ from policy_notification.notification_gateways.abstract_sms_gateway import Notif
     NotificationSendingResult
 from policy_notification.notification_templates import DefaultNotificationTemplates
 from policy_notification.utils import get_family_member_with_phone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 logger = logging.getLogger(__name__)
