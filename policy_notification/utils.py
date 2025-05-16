@@ -18,7 +18,7 @@ def get_default_notification_data():
 
 
 def validate_family_notification_data(data):
-    approval = data.get('approvalOfNotification', None)
+    approval = data.get('approvalOfNotification', False)
     language_of_notification = data.get('languageOfNotification', None)
 
     if not isinstance(approval, bool):
