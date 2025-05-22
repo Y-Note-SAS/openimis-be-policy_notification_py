@@ -18,8 +18,8 @@ def get_default_notification_data():
 
 
 def validate_family_notification_data(data):
-    approval = data.get('approvalOfNotification', None)
-    language_of_notification = data.get('languageOfNotification', None)
+    approval = data.get('approvalOfNotification', False)
+    language_of_notification = data.get('languageOfNotification', 'en')
 
     if not isinstance(approval, bool):
         raise ValidationError(F"approvalOfNotification has to be boolean, not {type(approval)}")

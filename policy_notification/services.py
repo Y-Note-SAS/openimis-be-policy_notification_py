@@ -8,6 +8,11 @@ from typing import List
 
 from policy_notification.models import FamilyNotification
 from insuree.models import Family
+from .utils import get_notification_providers
+from .apps import PolicyNotificationConfig
+from .notification_dispatcher import NotificationDispatcher
+from .notification_templates import DefaultNotificationTemplates
+from policy_notification.notification_triggers.notification_triggers import NotificationTriggerEventDetectors
 
 from policy_notification.utils import validate_family_notification_data, get_default_notification_data
 logger = logging.getLogger(__name__)
@@ -102,3 +107,35 @@ def delete_family_notification_policy(family_uuids: List[str]) -> List[FamilyNot
         sms.save()
         deleted.append(sms)
     return deleted
+
+class Sms_Send_Service:
+    
+    def __init__(self, user):
+        self._user = user
+        
+        
+    def sms_payment_request_for_policiy_activation(policy, user):
+        try:
+            notification_providers = get_notification_providers()
+            logger.info(F"send_notification_messages called at {datetime.now()}")
+            eligible_notification_types = PolicyNotificationConfig.eligible_notification_types
+
+            event_detector = NotificationTriggerEventDetectors()
+            # Ensure time intervals are loaded properly
+            event_detector.assign_default_intervals()
+
+            for provider in notification_providers:
+                # All gateways are used to inform insurees
+                dispatcher = NotificationDispatcher(
+                    notification_provider=provider(),
+                    notification_templates_source=DefaultNotificationTemplates(),
+                    trigger_detector=event_detector,
+                )
+                if eligible_notification_types.get('payment_request_for_policiy_activation', False):
+                    dispatcher.send_notification_request_payment_for_policiy_activation(policy, user)
+                    
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            logger.error(F"Failed to execute notification sending, error: {traceback.format_exc()}")
+    

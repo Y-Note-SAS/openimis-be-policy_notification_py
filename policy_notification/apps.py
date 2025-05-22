@@ -28,7 +28,11 @@ DEFAULT_CONFIG = {
         "need_for_renewal": False,
         "expiration_of_policy": False,
         "reminder_after_expiration": False,
-        "renewal_of_policy": False
+        "renewal_of_policy": False,
+        "payment_request_for_policiy_activation": False,
+        "payment_request_for_paamg": False,
+        "payment_of_policy_periodic": False,
+        "confirmation_of_policy_periodic_payment": False
     },
     "family_policy_notification_report_perms": ["131224"],
     "trigger_time_interval_hours": 4,

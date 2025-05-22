@@ -14,6 +14,22 @@ class DefaultNotificationTemplates:
         return output
 
     @property
+    def notification_request_payment_for_policiy_activation(self):
+        return _("policy_notification.sms_request_payment_for_activation_beneficiary")
+    
+    @property
+    def notification_request_payment_for_paamg(self):
+        return _("policy_notification.sms_request_payment_for_paamg")
+    
+    @property
+    def notification_on_periodic_payment(self):
+        return _("policy_notification.sms_on_periodic_payment")
+    
+    @property
+    def notification_on_periodic_payment_confirmation(self):
+        return _("policy_notification.sms_on_periodic_payment_confirmation")
+    
+    @property
     def notification_on_activation(self):
         return _("policy_notification.sms_on_activation")
 
