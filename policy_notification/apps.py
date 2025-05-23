@@ -65,6 +65,7 @@ class PolicyNotificationConfig(AppConfig):
     reminder_after_expiry_days = None
     policy_activation_relevance_maximum_days_timedelta = None
     policy_renewal_relevance_maximum_days_timedelta = None
+    paamg_number = None
 
     def _configure_perms(self, cfg):
         PolicyNotificationConfig.providers = cfg["providers"]
@@ -78,6 +79,7 @@ class PolicyNotificationConfig(AppConfig):
             cfg['policy_activation_relevance_maximum_days_timedelta']
         PolicyNotificationConfig.policy_renewal_relevance_maximum_days_timedelta = \
             cfg['policy_renewal_relevance_maximum_days_timedelta']
+        PolicyNotificationConfig.paamg_number = cfg["paamg_number"]
 
     def ready(self):
         from core.models import ModuleConfiguration

@@ -66,10 +66,10 @@ class NotificationDispatcher:
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_expiration, 'expiration_of_policy')
         
-    def send_notification_request_payment_for_policiy_activation(self, policy, user):
-        self._send_notification(
-            policy, self.templates.notification_request_payment_for_policiy_activation, user)
-        
+    def send_notification_request_payment_for_policiy_activation(self):
+        policies = self.trigger_detector.find_policies_to_pay()
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_request_payment_for_policiy_activation, 'payment_request_for_policiy_activation')        
         
     def send_notification_new_payment_request_for_paamg(self):
         policies = self.trigger_detector.find_paamg_policies_to_pay()

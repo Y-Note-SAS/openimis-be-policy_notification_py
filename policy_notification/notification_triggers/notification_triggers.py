@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 from django.db.models import Q, Count, Max, F
 from policy.models import Policy, PolicyRenewal
@@ -63,6 +64,15 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         expiry_date = datetime.now().date() \
                           - timedelta(days=cls.REMINDER_AFTER_EXPIRY_DAYS)
         ids = NotificationTriggerEventDetectors.policies_expiring_without_renewal(expiry_date)
+        return ids
+    
+    @classmethod
+    def find_policies_to_pay(cls):
+        if cls.already_called():
+                return []
+        
+        ids = NotificationTriggerEventDetectors.all_new_policies_needing_payment()
+        print(f"we are in the find_policies_to_pay with policies {ids}")
         return ids
 
     @classmethod
@@ -270,3 +280,43 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         cls.REMINDER_BEFORE_EXPIRY_DAYS = PolicyNotificationConfig.reminder_before_expiry_days
         cls.REMINDER_AFTER_EXPIRY_DAYS = PolicyNotificationConfig.reminder_after_expiry_days
 
+
+    @classmethod
+    def all_new_policies_needing_payment(cls):
+        # Récupère les nouvelles policies à l’état IDLE
+        new_policies = NotificationTriggerEventDetectors.__get_all_new_policies()
+        print(f"we are in the all_new_policies_needing_payment with policies {new_policies}")
+
+        # Filtrage des notifications déjà envoyées ou échouées
+        return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(new_policies)
+            
+    @staticmethod
+    def __get_all_new_policies():
+        now = datetime.now()
+        hours_interval = abs(PolicyNotificationConfig.trigger_time_interval_hours)
+        diff = timedelta(hours=hours_interval)
+        time_window_start = now - diff
+        return Policy.objects.filter(
+            validity_to__isnull=True,
+            status=Policy.STATUS_IDLE,
+            validity_from__gte=time_window_start
+        )
+    
+    @staticmethod
+    def __filter_not_sent_payment_requests(policies_queryset):
+        """
+        Filtre les polices pour lesquelles aucune notification de paiement n'a été envoyée.
+        """
+        return policies_queryset.filter(
+            Q(indication_of_notifications__isnull=True) 
+            | 
+            Q(indication_of_notifications__payment_request_for_policiy_activation__isnull=True) |
+            (
+                Q(indication_of_notifications__payment_request_for_policiy_activation=
+                  PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
+                Q(indication_of_notifications__details__notification_type="payment_request_for_policiy_activation",
+                  indication_of_notifications__details__status=
+                  IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
+            )
+        ).values_list('id', flat=True)
+        

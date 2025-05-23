@@ -36,8 +36,8 @@ class BulkSMSGateway(NotificationGatewayAbs):
         self.sending_time += datetime.timedelta(hours=self._GATEWAY_TIMEZONE_OFFSET)
         self.message_sent = notification_content
         self.family_number = family_number
-        if family_number and not family_number.startswith('+'):
-            family_number = f'+269{family_number}'  # Normalisation pour les Comores
+        # if family_number and not family_number.startswith('+'):
+        #     family_number = f'+269{family_number}'  # Normalisation pour les Comores
         self.family_number = family_number
         builder = builder or self.builder
         request = self.build_request(builder)

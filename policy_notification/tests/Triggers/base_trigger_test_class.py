@@ -4,6 +4,7 @@ from policy.test_helpers import create_test_policy
 from insuree.test_helpers import create_test_insuree
 from policy.models import Policy
 from product.test_helpers import create_test_product
+from contribution_plan.tests.helpers import create_test_contribution_plan
 
 from policy_notification.services import *
 from policy_notification.notification_triggers.notification_triggers import NotificationTriggerEventDetectors
@@ -11,7 +12,7 @@ from policy_notification.notification_triggers.notification_triggers import Noti
 
 class BaseTriggerTestCase(TestCase):
     TEST_TRIGGER_DETECTOR = NotificationTriggerEventDetectors
-    TEST_TRIGGER_DETECTOR.TIME_INTERVAL_HOURS = 24  # interval between task executions is set to 24h
+    TEST_TRIGGER_DETECTOR.TIME_INTERVAL_HOURS = 1  # interval between task executions is set to 24h
     TEST_TRIGGER_DETECTOR.REMINDER_BEFORE_EXPIRY_DAYS = 5
     TEST_TRIGGER_DETECTOR.REMINDER_AFTER_EXPIRY_DAYS = 5
 
@@ -31,9 +32,11 @@ class BaseTriggerTestCase(TestCase):
             "general_assembly_lump_sum": 130,
             "insurance_period": 12,
         })
+        self.test_contribution_plan = create_test_contribution_plan()
         self.test_family = self.test_insuree.family
         self.policy = create_test_policy(
             product=self.test_product,
+            contribution_plan=self.test_contribution_plan,
             insuree=self.test_insuree,
             custom_props={
                 "status": 2,
@@ -58,6 +61,7 @@ class BaseTriggerTestCase(TestCase):
     def _create_policy_renewal(self, expiry_date):
         self.renewed_policy = create_test_policy(
             product=self.test_product,
+            contribution_plan=self.test_contribution_plan,
             insuree=self.test_insuree,
             custom_props={
                 "status": 2,

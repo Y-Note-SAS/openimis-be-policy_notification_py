@@ -15,6 +15,10 @@ from policy_notification.notification_gateways import TextNotificationProvider, 
 from policy_notification.notification_templates import DefaultNotificationTemplates
 from policy_notification.services import *
 from policy_notification.notification_triggers.notification_triggers import NotificationTriggerEventDetectors
+from contribution_plan.tests.helpers import create_test_contribution_plan
+from core.test_helpers import create_test_interactive_user
+from core.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class DispatcherTest(TestCase):
@@ -28,6 +32,12 @@ class DispatcherTest(TestCase):
 
     def create_policy(self):
         self.test_insuree = create_test_insuree(with_family=True, custom_props={"phone": 123123123})
+        self.test_contribution_plan = create_test_contribution_plan()
+        try:
+            user = User.objects.get(username='Le-positif')
+        except ObjectDoesNotExist:
+            user = create_test_interactive_user(username='Le-positif', password="positif123")
+            
         self.test_product = create_test_product("PROD1111", custom_props={
             "max_members": 5,
             "administration_period": 0,
@@ -43,8 +53,9 @@ class DispatcherTest(TestCase):
                                                                   language_of_notification='en')
         self.test_family.family_notification.save()
         self.test_family.save()
-        self.policy = create_test_policy(
+        self.policy = create_test_policy( 
             product=self.test_product,
+            contribution_plan=self.test_contribution_plan,
             insuree=self.test_insuree,
             custom_props={
                 "status": 2,
@@ -61,7 +72,7 @@ class DispatcherTest(TestCase):
             'ExpiryDate': self.policy.expiry_date,
             'ProductCode': self.policy.product.code,
             'ProductName': self.policy.product.name,
-            'AmountToBePaid': policy_values(self.policy, self.policy.family, self.policy)[0].value
+            'AmountToBePaid': policy_values(self.policy, self.policy.family, self.policy, user)[0].value
         }
 
     @patch('policy_notification.notification_triggers.NotificationTriggerEventDetectors.find_activated_policies')
