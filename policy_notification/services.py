@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from typing import List
 
 from policy_notification.models import FamilyNotification
-from insuree.models import Family
+from insuree.models import Family 
 
 from policy_notification.utils import validate_family_notification_data, get_default_notification_data
 logger = logging.getLogger(__name__)
@@ -102,3 +102,4 @@ def delete_family_notification_policy(family_uuids: List[str]) -> List[FamilyNot
         sms.save()
         deleted.append(sms)
     return deleted
+ 

@@ -140,3 +140,37 @@ msgstr "Phone number only"
 #: policy_notification/reports/communication_by_notification/report_builder.py:10
 msgid "policy_notification.Mode.4"
 msgstr "No approval and phone number"
+
+
+#: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
+msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
+msgstr ""
+"A policy has been created for your family/group %(InsuranceID)s - %(Name)s with the "
+"insurance product %(ProductCode)s - %(ProductName)s. A payment is required to activate it. "
+"The invoice covers one month for now to ease your enrolment. Please pay as soon as possible."
+
+#: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
+msgid "policy_notification.sms_request_payment_for_paamg"
+msgstr ""
+"The PAAMG policy for the family/group %(InsuranceID)s - %(Name)s with the "
+"insurance product %(ProductCode)s - %(ProductName)s has been activated "
+"from %(EffectiveDate)s to %(ExpiryDate)s. Payment has been successfully processed."
+
+#: policy_notification/notification_templates/DefaultNotificationTemplates.py:25
+msgid "policy_notification.sms_on_periodic_payment"
+msgstr ""
+"A periodic payment was received for the policy of family/group "
+"%(InsuranceID)s - %(Name)s under product %(ProductCode)s - %(ProductName)s. "
+"Coverage is active from %(EffectiveDate)s until %(ExpiryDate)s."
+
+#: policy_notification/notification_templates/DefaultNotificationTemplates.py:29
+msgid "policy_notification.sms_on_periodic_payment_confirmation"
+msgstr ""
+"Confirmation: periodic payment has been processed for the policy of family/group "
+"%(InsuranceID)s - %(Name)s with insurance product %(ProductCode)s - %(ProductName)s. "
+"Policy is active from %(EffectiveDate)s to %(ExpiryDate)s."
+
+
+
+msgid "policy_notification.sms_on_policy_creation"
+msgstr "Nouvelle police créée. Veuillez régler la facture de %(amount)s."

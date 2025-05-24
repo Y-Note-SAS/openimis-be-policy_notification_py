@@ -1,4 +1,5 @@
 from .sms_trigger_started_test import TestStartedPolicyTrigger
 from .sms_trigger_activated_test import TestActivePolicyTrigger
 from .sms_trigger_no_renewal_test import TestNoRenewalPolicyTrigger
+from .sms_trigger_payment_test import TestPaymentPolicyTrigger
 

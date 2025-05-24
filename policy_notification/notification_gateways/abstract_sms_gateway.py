@@ -63,3 +63,7 @@ class NotificationGatewayAbs(ABC):
     @property
     def _gateway_provider_configuration(self):
         return PolicyNotificationConfig.providers[self.provider_configuration_key]
+    
+    @property
+    def _gateway_paamg_number_configuration(self):
+        return PolicyNotificationConfig.paamg_number

@@ -37,6 +37,10 @@ class IndicationOfPolicyNotifications(core_models.BaseVersionedModel):
     expiration_of_policy = models.DateTimeField(db_column='NotificationOnExpirationSent', null=True)
     reminder_after_expiration = models.DateTimeField(db_column='NotificationAfterExpirationSent', null=True)
     renewal_of_policy = models.DateTimeField(db_column='NotificationOnRenewalSent', null=True)
+    payment_request_for_policiy_activation = models.DateTimeField(db_column='NotificationOnPaymentRequestSent', null=True)
+    payment_request_for_paamg = models.DateTimeField(db_column='NotificationOnPaymentRequestPAAMGSent', null=True)
+    payment_of_policy_periodic = models.DateTimeField(db_column='NotificationOnPolicyPeriodicPaymentSent', null=True)
+    confirmation_of_policy_periodic_payment = models.DateTimeField(db_column='NotificationOnPolicyPeriodicConfirmationSent', null=True)
 
     class Meta:
         db_table = 'tblIndicationOfPolicyNotifications'

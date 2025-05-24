@@ -65,8 +65,28 @@ class NotificationDispatcher:
         policies = self.trigger_detector.find_expiring_today_policies()
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_expiration, 'expiration_of_policy')
+        
+    def send_notification_request_payment_for_policiy_activation(self):
+        policies = self.trigger_detector.find_policies_to_pay()
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_request_payment_for_policiy_activation, 'payment_request_for_policiy_activation')        
+        
+    def send_notification_new_payment_request_for_paamg(self):
+        policies = self.trigger_detector.find_paamg_policies_to_pay()
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_request_payment_for_paamg, 'payment_request_for_paamg')
+        
+    def send_notification_new_periodic_payment(self):
+        policies = self.trigger_detector.find_periodic_payment_policies()
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_on_periodic_payment, 'payment_of_policy_periodic')
+        
+    def send_notification_new_periodic_payment_confirmation(self):
+        policies = self.trigger_detector.find_policies_to_pay()
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_on_periodic_payment_confirmation, 'confirmation_of_policy_periodic_payment')
 
-    def _policy_customs(self, policy: Policy):
+    def _policy_customs(self, policy: Policy, user):
         """
         Build dictionary of parameters which will be used as custom parameters in notification templates.
         :param policy: Policy for which notification will be sent
@@ -80,7 +100,7 @@ class NotificationDispatcher:
             'ExpiryDate': policy.expiry_date,
             'ProductCode': policy.product.code,
             'ProductName': policy.product.name,
-            'AmountToBePaid': policy_values(policy, policy.family, policy)[0].value
+            'AmountToBePaid': policy_values(policy, policy.family, policy, user)[0].value
         }
         return customs
 
@@ -98,8 +118,8 @@ class NotificationDispatcher:
 
         return notification_sent_successfully
 
-    def _send_notification(self, policy, notification_template):
-        custom = self._policy_customs(policy)
+    def _send_notification(self, policy, notification_template, user = None):
+        custom = self._policy_customs(policy, user)
         return self.notification_client.send_notification_from_template(policy, notification_template, custom)
 
     def _get_eligible_policies(self, policies_ids, type_of_notification):
