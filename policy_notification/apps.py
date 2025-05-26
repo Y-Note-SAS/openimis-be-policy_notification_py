@@ -42,6 +42,7 @@ DEFAULT_CONFIG = {
     "reminder_after_expiry_days": 5,
     "policy_activation_relevance_maximum_days_timedelta": 5,
     "policy_renewal_relevance_maximum_days_timedelta": 5,
+    "paamg_number":"2545565588552"
 }
 
 logger = logging.getLogger(__name__)
