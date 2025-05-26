@@ -35,6 +35,7 @@ class PolicyNotificationClient:
             translation.activate(policy.family.family_notification.language_of_notification)
             custom = template_customs
             message = notification_template % custom
+            print(f"We send the message: {message} to {phone}")
             return self.provider.send_notification(message, family_number=phone)
 
         except Exception as e:

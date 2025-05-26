@@ -41,8 +41,8 @@ def send_notification_messages():
             # if eligible_notification_types.get('need_for_renewal', False):
             #     dispatcher.send_notification_not_renewed_soon_expiring_policies()
 
-            # if eligible_notification_types.get('expiration_of_policy', False):
-            #     dispatcher.send_notification_expiring_today_policies()
+            if eligible_notification_types.get('expiration_of_policy', False):
+                dispatcher.send_notification_expiring_today_policies()
 
             # if eligible_notification_types.get('reminder_after_expiration', False):
             #     dispatcher.send_notification_not_renewed_expired_policies()

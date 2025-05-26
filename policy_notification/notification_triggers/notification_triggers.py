@@ -90,6 +90,8 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
     def all_activated_policies(cls):
         active_and_alternated = NotificationTriggerEventDetectors\
             .__get_all_active()
+            
+        # print(f"Here is our first table: {active_and_alternated}")
         return NotificationTriggerEventDetectors.__filter_not_sent(active_and_alternated)
 
     @classmethod
@@ -139,6 +141,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
                       IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
                 )
             ).annotate(altered_column=F('id'))
+        # print(f"Here is our second table: {active_and_alternated}")
 
         # Id of last policy before time period
         return NotificationTriggerEventDetectors\
@@ -234,13 +237,13 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
             .only('altered_column', 'status')\
             .values('altered_column', 'status')\
             .annotate(legacy_value=F('status'))\
-            .all()
+            .distinct() 
 
         latest = active_and_alternated\
             .only('altered_column', 'status')\
             .values('altered_column', 'status') \
             .annotate(current_value=F('status'))\
-            .all()
+            .distinct()
 
         result_list = chain(latest, historic_policies_data)
         unique_results = groupby(result_list, key=lambda obj: obj['altered_column'])

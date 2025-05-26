@@ -58,6 +58,22 @@ class NotEligibleNotificationHandler:
             if not hasattr(ineligible_policy.policy, 'indication_of_notifications')
         ]
         IndicationOfPolicyNotifications.objects.bulk_create(out)
+    
+    # def _ensure_indication_exits(self, ineligible: Iterable[IneligibleObject]):
+    #     # Create indication for entries without ones
+    #     policy_ids = [ineligible_policy.policy.id for ineligible_policy in ineligible]
+    #     # Vérifier les enregistrements existants
+    #     existing_policy_ids = IndicationOfPolicyNotifications.objects.filter(
+    #         policy_id__in=policy_ids
+    #     ).values_list('policy_id', flat=True)
+
+    #     out = [
+    #         self.__create_failed_indication(ineligible_policy.policy)
+    #         for ineligible_policy in ineligible
+    #         if ineligible_policy.policy.id not in existing_policy_ids
+    #     ]
+    #     if out:
+    #         IndicationOfPolicyNotifications.objects.bulk_create(out)
 
     def __create_failed_indication(self, policy):
         return IndicationOfPolicyNotifications(**{
