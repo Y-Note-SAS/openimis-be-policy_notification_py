@@ -16,9 +16,9 @@ class PolicyNotificationClient:
     def __init__(self, notification_provider: NotificationGatewayAbs):
         self.provider = notification_provider
 
-    def send_notification_from_template(self, policy, notification_template, template_customs) \
+    def send_notification_from_template(self, policy, notification_template, template_customs, phone_number = None) \
             -> NotificationSendingResult:
-        phone = policy.family.head_insuree.phone
+        phone = policy.family.head_insuree.phone if not phone_number else  phone_number
         if not phone:
             family_member_with_phone = get_family_member_with_phone(policy.family)
             if family_member_with_phone:
