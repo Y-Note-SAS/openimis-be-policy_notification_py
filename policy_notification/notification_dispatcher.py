@@ -46,51 +46,61 @@ class NotificationDispatcher:
 
     def send_notification_new_active_policies(self):
         policies = self.trigger_detector.find_activated_policies()
+        print(f"we are in the send_notification_new_active_policies with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_activation, 'activation_of_policy')
 
     def send_notification_starting_of_policy(self):
         policies = self.trigger_detector.find_newly_effective_policies()
+        print(f"we are in the send_notification_starting_of_policy with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_effective, 'starting_of_policy')
 
     def send_notification_new_renewed_policies(self):
         policies = self.trigger_detector.find_renewed_policies()
+        print(f"we are in the send_notification_new_renewed_policies with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_renewal, 'renewal_of_policy')
 
     def send_notification_not_renewed_soon_expiring_policies(self):
         policies = self.trigger_detector.find_soon_expiring_policies()
+        print(f"we are in the send_notification_not_renewed_soon_expiring_policies with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_before_expiry, 'expiration_of_policy')
 
     def send_notification_not_renewed_expired_policies(self):
         policies = self.trigger_detector.find_recently_expired_policies()
+        print(f"we are in the send_notification_not_renewed_expired_policies with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_after_expiry, 'reminder_after_expiration')
 
     def send_notification_expiring_today_policies(self):
         policies = self.trigger_detector.find_expiring_today_policies()
+        print(f"we are in the send_notification_expiring_today_policies with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_expiration, 'expiration_of_policy')
         
     def send_notification_request_payment_for_policiy_activation(self):
         policies = self.trigger_detector.find_policies_to_pay()
+        print(f"we are in the send_notification_request_payment_for_policiy_activation with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_request_payment_for_policiy_activation, 'payment_request_for_policiy_activation')        
         
     def send_notification_new_payment_request_for_paamg(self):
         policies = self.trigger_detector.find_paamg_policies_to_pay()
+        print(f"we are in the send_notification_new_payment_request_for_paamg with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_request_payment_for_paamg, 'payment_request_for_paamg')
         
     def send_notification_new_periodic_payment(self):
         policies = self.trigger_detector.find_periodic_payment_policies()
+        print(f"we are in the send_notification_new_periodic_payment with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_periodic_payment, 'payment_of_policy_periodic')
         
     def send_notification_new_periodic_payment_confirmation(self):
         policies = self.trigger_detector.find_periodic_payment_confirmed_policies()
+        print(f"we are in the send_notification_new_periodic_payment_confirmation with policies {policies}")
         self._send_notification_for_eligible_policies(
             policies, self.templates.notification_on_periodic_payment_confirmation, 'confirmation_of_policy_periodic_payment')
 
@@ -131,6 +141,7 @@ class NotificationDispatcher:
         return customs
 
     def _send_notification_for_eligible_policies(self, policies, notification_template, type_of_notification):
+        print("we are in the sent eligible method")
         notification_sent_successfully = []
         seen_policy_ids = set()  # Garder une trace des polices déjà traitées
         for policies_chunk in self.__chunk_list(policies):
@@ -150,6 +161,7 @@ class NotificationDispatcher:
         return notification_sent_successfully
 
     def _send_notification(self, policy, notification_template, type_of_notification, user = None):
+        print("we are in the sent notification method")
         custom = self._policy_customs(policy, user)
         family = policy.family
         head_insuree = family.head_insuree
@@ -159,136 +171,41 @@ class NotificationDispatcher:
             insuree_content_type = ContentType.objects.get_for_model(Insuree)
             invoice_filter = {
                 'subject_type': insuree_content_type,
-                'subject_id': str(head_insuree.id),
-                'validity_to__isnull': True,
+                'subject_id': str(head_insuree.id), 
                 'is_deleted': False
             }
-        
-        # Pour les relances, chercher les factures VALIDATED des dernières 48 heures
-        # Pour les confirmations, chercher les factures RECONCILIATED des dernières 48 heures
-        if type_of_notification == 'confirmation_of_policy_periodic_payment':
-            invoice_filter.update({
-                'status': Invoice.Status.RECONCILIATED,
-                'date_payed__gte': timezone.now() - timedelta(days=2)
-            })
-        else:
-            invoice_filter.update({
-                'status': Invoice.Status.VALIDATED,
-                'date_issued__gte': timezone.now() - timedelta(days=2)
-            })
-        
+    
         invoice = Invoice.objects.filter(**invoice_filter).first()
-        
-        if not invoice:
-            logger.warning(f"No matching invoice found for insuree {head_insuree.id} (policy {policy.id}), skipping SMS.")
-            return False
-        
-        custom.update({
-            'AmountToBePaid': invoice.amount_total
-        })
-        
-        # Déterminer le niveau de solvabilité
-        try:
-            json_ext = policy.contribution_plan.json_ext.get('calculation_rule', {})
-
-            has_individual_contributions = any(json_ext.get(key) for key in ['lumpsum', 'childsum', 'adultmalesum', 'adultfemalesum'])
-            has_government_contributions = any(json_ext.get(key) for key in ['governmentlumpsum', 'governmentchildsum', 'governmentadultmalesum', 'governmentadultfemalesum'])
+        if invoice:
+            custom.update({
+                'AmountToBePaid': invoice.amount_total
+            })
+         
+        if type_of_notification == "payment_of_policy_periodic":
+            # Vérifier la limite de 4 SMS par mois
+            current_month = datetime.now().strftime('%Y-%m')
+            sms_count = IndicationOfPolicyNotificationsDetails.objects.filter(
+                indication_of_notification__policy=policy,
+                notification_type=type_of_notification,
+                validity_from__year=datetime.now().year,
+                validity_from__month=datetime.now().month,
+                status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY
+            ).count()
             
-            if has_individual_contributions and not has_government_contributions:
-                contribution_level = 'solvable'
-            elif has_individual_contributions and has_government_contributions:
-                contribution_level = 'vulnerable'
-            elif has_government_contributions and not has_individual_contributions:
-                contribution_level = 'destitute'
-            else:
-                logger.error(f"Invalid contribution plan configuration for policy {policy.id}: {json_ext}")
+            if sms_count >= 4:
+                logger.debug(f"Max 4 SMS reached for policy {policy.id} in {current_month}, skipping.")
                 return False
-        except (json.JSONDecodeError, AttributeError) as e:
-            logger.error(f"Failed to parse contribution plan jsonExt for policy {policy.id}: {str(e)}")
-            return False
         
-        # Vérifier la limite de 4 SMS par mois
-        current_month = datetime.now().strftime('%Y-%m')
-        sms_count = IndicationOfPolicyNotificationsDetails.objects.filter(
-            indication_of_notification__policy=policy,
-            notification_type=type_of_notification,
-            validity_from__year=datetime.now().year,
-            validity_from__month=datetime.now().month,
-            status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY
-        ).count()
+        # Vérifier si un SMS a déjà été envoyé pour cette facture 
+        # if IndicationOfPolicyNotificationsDetails.objects.filter(
+        #     indication_of_notification__policy=policy,
+        #     notification_type=type_of_notification, 
+        #     status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY
+        # ).exists():
+        #     logger.debug(f"SMS already sent for invoice {invoice.id} of policy {policy.id}, skipping.")
+        #     return False 
         
-        if sms_count >= 4:
-            logger.debug(f"Max 4 SMS reached for policy {policy.id} in {current_month}, skipping.")
-            return False
-        
-        # Vérifier si un SMS a déjà été envoyé pour cette facture
-        details = f"invoice_id:{invoice.id}"
-        if IndicationOfPolicyNotificationsDetails.objects.filter(
-            indication_of_notification__policy=policy,
-            notification_type=type_of_notification,
-            details=details,
-            status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY
-        ).exists():
-            logger.debug(f"SMS already sent for invoice {invoice.id} of policy {policy.id}, skipping.")
-            return False
-
-        result = False
-        
-        try:
-            if contribution_level == 'solvable':
-                if head_insuree.phone:
-                    result = self.notification_client.send_notification_from_template(
-                        policy, notification_template, custom
-                    )
-                else:
-                    logger.warning(f"No phone number for head insuree {head_insuree.id} of policy {policy.id}, skipping SMS.")
-                    return False
-            
-            elif contribution_level == 'vulnerable':
-                results = []
-                if head_insuree.phone:
-                    results.append(self.notification_client.send_notification_from_template(
-                        policy, notification_template, custom
-                    ))
-                auxiliary_number = self.paamg_number
-                if auxiliary_number :
-                    results.append(self.notification_client.send_notification_from_template(
-                        policy, notification_template, custom, phone_number=auxiliary_number
-                    ))
-                result = any(results) if results else False
-                if not results:
-                    logger.warning(f"No valid phone numbers for policy {policy.id} (vulnerable), skipping SMS.")
-                    return False
-            
-            elif contribution_level == 'destitute':
-                if self.paamg_number:
-                    result = self.notification_client.send_notification_from_template(
-                        policy, notification_template, custom, phone_number = self.paamg_number
-                    )
-                else:
-                    logger.error(f"No PAAMG number configured for policy {policy.id}, skipping SMS.")
-                    return False
-            else:
-                logger.error(f"Unknown contribution level {family.contribution_level} for policy {policy.id}.")
-                return False
-            
-            # Enregistrer l'envoi dans IndicationOfPolicyNotificationsDetails
-            if result:
-                indication = self._get_or_create_policy_indication(policy)
-                IndicationOfPolicyNotificationsDetails.objects.create(
-                    indication_of_notification=indication,
-                    notification_type=type_of_notification,
-                    status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY,
-                    details=details,
-                    validity_from=timezone.now()
-                )
-            return result
-        
-        except Exception as e:
-            logger.error(f"Failed to send SMS for policy {policy.id}: {str(e)}")
-            return False
-        
-        # return self.notification_client.send_notification_from_template(policy, notification_template, custom)
+        return self.notification_client.send_notification_from_template(policy, notification_template, custom)
 
     def _get_eligible_policies(self, policies_ids, type_of_notification):
         policies = Policy.objects.filter(id__in=policies_ids)
@@ -316,13 +233,20 @@ class NotificationDispatcher:
             self._create_indication_details(indication, type_of_notification, result)
 
     def _create_indication_details(self, indication, type_of_notification, result):
+        is_sent_successfully = bool(result) is True
+
+        # On utilise result.output seulement si result est un objet et non un booléen
+        details = None
+        if not is_sent_successfully and result is not None and not isinstance(result, bool):
+            details = result.output
         indication_details = IndicationOfPolicyNotificationsDetails(**{
             'indication_of_notification': indication,
             'notification_type': type_of_notification,
             'status':
                 IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY if bool(result) is True
                 else IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR,
-            'details': None if bool(result) or result is None else result.output
+            # 'details': None if bool(result) or result is None else result.output
+            'details': details
         })
         indication_details.save()
 

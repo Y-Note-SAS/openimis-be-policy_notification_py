@@ -27,7 +27,7 @@ msgstr ""
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:22
 msgid "policy_notification.sms_on_effective"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
+"The policy for the family/group %(InsuranceID)s - %(Name)s with the " 
 "insurance product %(ProductCode)s - %(ProductName)s starts insurance "
 "coverage today and expires on %(ExpiryDate)s."
 
@@ -165,10 +165,6 @@ msgstr ""
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:29
 msgid "policy_notification.sms_on_periodic_payment_confirmation"
 msgstr ""
-"Confirmation: Your contribution of %(AmountToBePaid)s for the policy of family/group " 
+"Confirmation: Your contribution payment of %(AmountToBePaid)s for the policy of family/group "
 "%(InsuranceID)s - %(Name)s with product %(ProductCode)s - %(ProductName)s has been processed."
-
-
-
-msgid "policy_notification.sms_on_policy_creation"
-msgstr "Nouvelle police créée. Veuillez régler la facture de %(amount)s."
+ 

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.utils import timezone
 
-from django.db.models import Q, Count, Max, F
+from django.db.models import Q, Count, Max, F, OuterRef, Exists, Subquery, ExpressionWrapper, DateTimeField
 from policy.models import Policy, PolicyRenewal
 from itertools import groupby, chain
 from collections import ChainMap
@@ -49,7 +49,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
 
         expiry_date = datetime.now().date() \
                           + timedelta(days=cls.REMINDER_BEFORE_EXPIRY_DAYS)
-        ids = NotificationTriggerEventDetectors.policies_expiring_without_renewal(expiry_date)
+        ids = NotificationTriggerEventDetectors.policies_expiring_without_renewal(expiry_date, notificatio_type = "need_for_renewal")
         return ids
 
     @classmethod
@@ -76,8 +76,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         if cls.already_called():
                 return []
         
-        ids = NotificationTriggerEventDetectors.all_new_policies_needing_payment()
-        print(f"we are in the find_policies_to_pay with policies {ids}")
+        ids = NotificationTriggerEventDetectors.all_new_policies_needing_payment() 
         return ids
     
     @classmethod
@@ -87,7 +86,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         
         # Récupérer les polices avec de nouvelles factures
         policies = cls.all_policies_needing_periodic_payment()
-        logger.debug(f"Found {len(policies)} policies with new invoices for periodic payment: {list(policies.values_list('id', flat=True))}")
+        print(f"Found {len(policies)} policies with with new invoices for periodic payment:{policies}")
         
         # Filtrer les notifications déjà envoyées
         return cls.__filter_not_sent_periodic_payment(policies)
@@ -99,7 +98,8 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         
         # Récupérer les polices avec des factures récemment payées
         policies = cls.all_policies_with_confirmed_payment()
-        logger.debug(f"Found {len(policies)} policies with confirmed payments: {list(policies.values_list('id', flat=True))}")
+        # logger.debug(f"Found {len(policies)} policies with confirmed payments: {list(policies.values_list('id', flat=True))}")
+        print(f"Found {len(policies)} policies with onfirmed payments:{policies}")
         
         # Filtrer les notifications déjà envoyées
         return cls.__filter_not_sent_payment_confirmation(policies)
@@ -111,17 +111,17 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         policies = cls.__get_all_new_policies()
         # Filtrer les polices PAAMG avec au moins un champ gouvernemental non nul
         paamg_policies = policies.filter(
-            Q(contribution_plan__jsonExt__contains='"governmentlumpsum":') &
-            ~Q(contribution_plan__jsonExt__contains='"governmentlumpsum": "0"') |
-            Q(contribution_plan__jsonExt__contains='"governmentchildsum":') &
-            ~Q(contribution_plan__jsonExt__contains='"governmentchildsum": "0"') |
-            Q(contribution_plan__jsonExt__contains='"governmentadultmalesum":') &
-            ~Q(contribution_plan__jsonExt__contains='"governmentadultmalesum": "0"') |
-            Q(contribution_plan__jsonExt__contains='"governmentadultfemalesum":') &
-            ~Q(contribution_plan__jsonExt__contains='"governmentadultfemalesum": "0"')
-        ).values_list('id', flat=True)
-        logger.debug(f"Found {len(paamg_policies)} PAAMG policies needing payment: {list(paamg_policies)}")
-        return cls.__filter_not_sent_payment_requests(paamg_policies)
+            Q(contribution_plan__json_ext__calculation_rule__governmentlumpsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentlumpsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__governmentchildsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentchildsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__governmentadultmalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentadultmalesum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__governmentadultfemalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentadultfemalesum="0")
+        )
+        # Filtrage des notifications déjà envoyées ou échouées
+        return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(paamg_policies, 'payment_request_for_paamg')
 
     @classmethod
     def policies_activated_from(cls, from_time):
@@ -241,7 +241,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         return policy_queryset.values(*columns)
 
     @classmethod
-    def policies_expiring_without_renewal(cls, expiry_date):
+    def policies_expiring_without_renewal(cls, expiry_date, notificatio_type="expiration_of_policy"):
         renewal_date = expiry_date + timedelta(days=1)
 
         expiring = Policy.objects\
@@ -259,8 +259,59 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
                 .filter(start_date__gte=renewal_date)
             if not following_policies.exists():
                 not_renewed.append(policy)
+                
+            
+                
+        if notificatio_type == "need_for_renewal":
+            
+            """
+            Filtrer les polices qui :
+            - Ont reçu moins de 8 SMS need_for_renewal entre expiry_date et expiry_date + 60 jours
+            - N'ont pas reçu de SMS dans les 7 derniers jours
+            """
+            now_dt = timezone.now()
+            seven_days_ago = now_dt - timedelta(days=7)
+            not_renewed_ids = [p.id for p in not_renewed]
+            not_renewed_qs = Policy.objects.filter(id__in=not_renewed_ids)
 
-        return [policy.id for policy in not_renewed]
+            last_sms_sent_subquery = IndicationOfPolicyNotificationsDetails.objects.filter(
+                indication_of_notification__policy=OuterRef('pk'),
+                notification_type=notificatio_type,
+                status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY,
+            ).order_by('-validity_from').values('validity_from')[:1]
+
+            policies_queryset = not_renewed_qs.annotate(
+                sms_sent_in_payment_window=Count(
+                    'indication_of_notifications__details',
+                    filter=Q(
+                        indication_of_notifications__details__notification_type=notificatio_type,
+                        indication_of_notifications__details__status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY,
+                        indication_of_notifications__details__validity_from__gte=F('expiry_date'),
+                        indication_of_notifications__details__validity_from__lte=F('expiry_date') + timedelta(days=60),
+                    )
+                ),
+                last_sms_sent=Subquery(last_sms_sent_subquery)
+            )
+
+            return policies_queryset.filter(
+                Q(sms_sent_in_payment_window__lt=8) &
+                (
+                    Q(last_sms_sent__isnull=True) |
+                    Q(last_sms_sent__lte=seven_days_ago)
+                ) &
+                (
+                    Q(indication_of_notifications__isnull=True) |
+                    Q(indication_of_notifications__need_for_renewal__isnull=True) |
+                    (
+                        Q(indication_of_notifications__need_for_renewal=PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
+                        Q(indication_of_notifications__details__notification_type='need_for_renewal') &
+                        Q(indication_of_notifications__details__status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
+                    )
+                )
+            ).values_list('id', flat=True)
+        else:
+            return [policy.id for policy in not_renewed]
+            
 
     @staticmethod
     def __get_product_conversion(product):
@@ -297,11 +348,15 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         return newly_activated
     
     @classmethod
-    def already_called(cls): 
+    def already_called(cls):
+        # Check if this event trigger was already called for given day
         now = datetime.now()
         trigger_delta = timedelta(hours=cls.TIME_INTERVAL_HOURS)
-        last_execution = now - trigger_delta
-        return last_execution.date() == now.date() and last_execution.hour >= cls.FIRST_CALL_HOUR
+
+        if (now - trigger_delta).date() == datetime.today():
+            return True
+        else:
+            return False
 
     @classmethod
     def first_call_in_day(cls):
@@ -324,28 +379,42 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
 
     @classmethod
     def all_new_policies_needing_payment(cls):
-        # Récupère les nouvelles policies à l’état IDLE
+        # Récupère les nouvelles policies à l’état IDLE 
         new_policies = NotificationTriggerEventDetectors.__get_all_new_policies()
-        print(f"we are in the all_new_policies_needing_payment with policies {new_policies}")
+        
+        beneficiary_policies = new_policies.filter(
+            Q(contribution_plan__json_ext__calculation_rule__lumpsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__lumpsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__childsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__childsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__adultmalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__adultmalesum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__adultfemalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__adultfemalesum="0")
+        )
+        print(f"we are in the all_new_policies_needing_payment with policies {beneficiary_policies}")
 
         # Filtrage des notifications déjà envoyées ou échouées
-        return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(new_policies)
+        return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(beneficiary_policies, 'payment_request_for_policiy_activation')
     
     @staticmethod
     def all_policies_needing_periodic_payment():
-        # Récupérer les factures créées dans les dernières 48 heures
+        # Récupérer les factures créées dans les derniers 30 jours
         insuree_content_type = ContentType.objects.get_for_model(Insuree)
         recent_invoices = Invoice.objects.filter(
-            validity_to__isnull=True,
+            # validity_to__isnull=True,
             status=Invoice.Status.VALIDATED,  # Factures validées mais non payées
-            date_issued__gte=timezone.now() - timedelta(days=2),
+            date_created__gte=timezone.now() - timedelta(days=30),
             subject_type=insuree_content_type,
             is_deleted=False
         )
         
-        # Récupérer les assureurs associés aux factures
-        insuree_ids = recent_invoices.values_list('subject_id', flat=True)
-        insurees = Insuree.objects.filter(id__in=insuree_ids, validity_to__isnull=True)
+        # Extraire les subject_id et les convertir en int
+        subject_ids = list(recent_invoices.values_list('subject_id', flat=True))
+        subject_ids_int = [int(x) for x in subject_ids]  # conversion en int
+
+        # Récupérer les assurés associés aux factures
+        insurees = Insuree.objects.filter(id__in=subject_ids_int, validity_to__isnull=True)
         family_ids = insurees.values_list('family_id', flat=True).distinct()
         
         # Récupérer les polices actives associées à ces familles
@@ -359,24 +428,28 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
             'indication_of_notifications'
         )
         
-        logger.info(f"Found {len(policies)} policies with new invoices: {list(policies.values_list('id', flat=True))}")
+        # logger.info(f"Found {len(policies)} policies with new invoices: {list(policies.values_list('id', flat=True))}")
+        print(f"Found {len(policies)} policies with new invoices:{policies}")
         return policies
         
     @staticmethod
     def all_policies_with_confirmed_payment():
-        # Récupérer les factures payées dans les dernières 48 heures
+        # Récupérer les factures payées dans les derniers 30 jours
         insuree_content_type = ContentType.objects.get_for_model(Insuree)
         recent_invoices = Invoice.objects.filter(
-            validity_to__isnull=True,
+            # validity_to__isnull=True,
             status=Invoice.Status.RECONCILIATED,  # Factures payées et reconciliés
-            date_payed__gte=timezone.now() - timedelta(days=2),
+            date_payed__gte=timezone.now() - timedelta(days=30),
             subject_type=insuree_content_type,
             is_deleted=False
         )
         
+        # Extraire les subject_id et les convertir en int
+        subject_ids = list(recent_invoices.values_list('subject_id', flat=True))
+        subject_ids_int = [int(x) for x in subject_ids]  # conversion en int
+
         # Récupérer les assurés associés aux factures
-        insuree_ids = recent_invoices.values_list('subject_id', flat=True)
-        insurees = Insuree.objects.filter(id__in=insuree_ids, validity_to__isnull=True)
+        insurees = Insuree.objects.filter(id__in=subject_ids_int, validity_to__isnull=True)
         family_ids = insurees.values_list('family_id', flat=True).distinct()
         
         # Récupérer les polices actives associées à ces familles
@@ -390,7 +463,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
             'indication_of_notifications'
         )
         
-        logger.info(f"Found {len(policies)} policies with confirmed payments: {list(policies.values_list('id', flat=True))}")
+        print(f"Found {len(policies)} policies with confirmed payments:{policies}")
         return policies
         
     @staticmethod
@@ -401,23 +474,24 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         time_window_start = now - diff
         return Policy.objects.filter(
             validity_to__isnull=True,
-            status=Policy.STATUS_IDLE,
-            validity_from__gte=time_window_start
+            status=Policy.STATUS_IDLE
+            # ,
+            # validity_from__gte=time_window_start
         )
     
     @staticmethod
-    def __filter_not_sent_payment_requests(policies_queryset):
+    def __filter_not_sent_payment_requests(policies_queryset, request_type="payment_request_for_policiy_activation"):
         """
-        Filtre les polices pour lesquelles aucune notification de paiement n'a été envoyée.
+        Filtre les polices pour lesquelles aucune notification de paiement du type spécifié n'a été envoyée avec succès.
         """
         return policies_queryset.filter(
-            Q(indication_of_notifications__isnull=True) 
-            | 
+            Q(indication_of_notifications__isnull=True) |
+            Q(**{f"indication_of_notifications__{request_type}__isnull": True}) | 
             Q(indication_of_notifications__payment_request_for_policiy_activation__isnull=True) |
             (
                 Q(indication_of_notifications__payment_request_for_policiy_activation=
                   PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
-                Q(indication_of_notifications__details__notification_type="payment_request_for_policiy_activation",
+                Q(indication_of_notifications__details__notification_type=request_type,
                   indication_of_notifications__details__status=
                   IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
             )
