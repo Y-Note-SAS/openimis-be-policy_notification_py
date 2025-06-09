@@ -80,6 +80,14 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         return ids
     
     @classmethod
+    def find_policies_to_pay_vulnerable(cls):
+        if cls.already_called():
+                return []
+        
+        ids = NotificationTriggerEventDetectors.all_new_policies_needing_payment_vulnerable() 
+        return ids
+    
+    @classmethod
     def find_periodic_payment_policies(cls):
         if cls.already_called():
             return []
@@ -382,6 +390,11 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         # Récupère les nouvelles policies à l’état IDLE 
         new_policies = NotificationTriggerEventDetectors.__get_all_new_policies()
         
+        # Familles simples : pas de parent
+        new_policies = new_policies.exclude(
+            family__parent__isnull=True
+        )
+        
         beneficiary_policies = new_policies.filter(
             Q(contribution_plan__json_ext__calculation_rule__lumpsum__isnull=False) &
             ~Q(contribution_plan__json_ext__calculation_rule__lumpsum="0") |
@@ -396,7 +409,35 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
 
         # Filtrage des notifications déjà envoyées ou échouées
         return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(beneficiary_policies, 'payment_request_for_policiy_activation')
-    
+
+    @classmethod
+    def all_new_policies_needing_payment_vulnerable(cls):
+        # Récupère les nouvelles policies à l’état IDLE 
+        new_policies = NotificationTriggerEventDetectors.__get_all_new_policies()
+        print(f"we are in the all_new_policies_needing_payment_vulnerable with policies1111111111 {new_policies}")
+        
+        # Sous-familles polygames
+        new_policies = new_policies.filter(
+            family__parent__isnull=False
+        )
+        print(f"we are in the all_new_policies_needing_payment_vulnerable with policies2222222 {new_policies}")
+
+        beneficiary_policies = new_policies.filter(
+            Q(contribution_plan__json_ext__calculation_rule__lumpsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__lumpsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__childsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__childsum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__adultmalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__adultmalesum="0") |
+            Q(contribution_plan__json_ext__calculation_rule__adultfemalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__adultfemalesum="0")
+        )
+        print(f"we are in the all_new_policies_needing_payment_vulnerable with policies {new_policies}")
+
+        return NotificationTriggerEventDetectors.__filter_not_sent_payment_requests(
+            beneficiary_policies, 'payment_request_for_policiy_activation_vulnerable'
+        )
+        
     @staticmethod
     def all_policies_needing_periodic_payment():
         # Récupérer les factures créées dans les derniers 30 jours
@@ -486,15 +527,12 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         """
         return policies_queryset.filter(
             Q(indication_of_notifications__isnull=True) |
-            Q(**{f"indication_of_notifications__{request_type}__isnull": True}) | 
-            Q(indication_of_notifications__payment_request_for_policiy_activation__isnull=True) |
-            (
-                Q(indication_of_notifications__payment_request_for_policiy_activation=
-                  PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
-                Q(indication_of_notifications__details__notification_type=request_type,
-                  indication_of_notifications__details__status=
-                  IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
-            )
+            Q(**{f"indication_of_notifications__{request_type}__isnull": True}) |
+            Q(**{f"indication_of_notifications__{request_type}":
+                PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE}) &
+            Q(indication_of_notifications__details__notification_type=request_type,
+            indication_of_notifications__details__status=
+            IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
         ).values_list('id', flat=True)
         
     @staticmethod

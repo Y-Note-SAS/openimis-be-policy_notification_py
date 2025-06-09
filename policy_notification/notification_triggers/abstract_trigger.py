@@ -35,6 +35,10 @@ class NotificationTriggerAbs(ABC):
         raise NotImplementedError("find_new_created_policies not implemented")
     
     @classmethod
+    def find_policies_to_pay_vulnerable(cls) -> List[type(Policy.id)]:
+        raise NotImplementedError("find_new_created_policies_vulnerable not implemented")    
+    
+    @classmethod
     def find_paamg_policies_to_pay(cls) -> List[type(Policy.id)]:
         raise NotImplementedError("find_new_created_policies_paamg not implemented")
     

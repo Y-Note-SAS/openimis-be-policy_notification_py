@@ -21,7 +21,7 @@ from invoice.models import Invoice
 from insuree.models import Insuree
 from django.utils import timezone
 from datetime import timedelta
-import json
+from policy_notification.utils import get_auxiliary_contributor_with_phone
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,13 @@ class NotificationDispatcher:
         policies = self.trigger_detector.find_policies_to_pay()
         print(f"we are in the send_notification_request_payment_for_policiy_activation with policies {policies}")
         self._send_notification_for_eligible_policies(
-            policies, self.templates.notification_request_payment_for_policiy_activation, 'payment_request_for_policiy_activation')        
+            policies, self.templates.notification_request_payment_for_policiy_activation, 'payment_request_for_policiy_activation')  
+     
+    def send_notification_request_payment_for_policy_activation_vulnerable(self):
+        policies = self.trigger_detector.find_policies_to_pay_vulnerable()
+        print(f"we are in the send_notification_request_payment_for_policy_activation_vulnerable with policies {policies}")
+        self._send_notification_for_eligible_policies(
+            policies, self.templates.notification_request_payment_for_policiy_activation_vulnerable, 'payment_request_for_policiy_activation_vulnerable')           
         
     def send_notification_new_payment_request_for_paamg(self):
         policies = self.trigger_detector.find_paamg_policies_to_pay()
@@ -110,23 +116,7 @@ class NotificationDispatcher:
         :param policy: Policy for which notification will be sent
         :return: Dictionary which keys used in templates
         """
-        head = policy.family.head_insuree
-        json_ext = policy.contribution_plan.json_ext.get('calculation_rule', {}) if policy.contribution_plan else {}
-        has_individual_contributions = any(json_ext.get(key) for key in ['lumpsum', 'childsum', 'adultmalesum', 'adultfemalesum'])
-        has_government_contributions = any(json_ext.get(key) for key in ['governmentlumpsum', 'governmentchildsum', 'governmentadultmalesum', 'governmentadultfemalesum'])
-        
-        # Calcul du montant pour PAAMG
-        government_amount = sum(
-            float(json_ext.get(key, '0')) for key in [
-                'governmentlumpsum', 'governmentchildsum', 'governmentadultmalesum', 'governmentadultfemalesum'
-            ]
-        )
-        
-        period = 1  # Par défaut pour solvables
-        if has_individual_contributions and has_government_contributions:
-            period = 3  # Vulnérables
-        elif has_government_contributions and not has_individual_contributions:
-            period = 12  # Démunis
+        head = policy.family.head_insuree 
             
         customs = {
             'InsuranceID': head.chf_id,
@@ -135,8 +125,9 @@ class NotificationDispatcher:
             'ExpiryDate': policy.expiry_date,
             'ProductCode': policy.product.code,
             'ProductName': policy.product.name,
-            'AmountToBePaid': policy_values(policy, policy.family, policy, user)[0].value if has_individual_contributions else government_amount,
-            'Period': period
+            'AmountToBePaid': policy_values(policy, policy.family, policy, user)[0].value,
+            'DateDue': policy.expiry_date,
+            'PaymentDate': policy.expiry_date
         }
         return customs
 
@@ -178,7 +169,9 @@ class NotificationDispatcher:
         invoice = Invoice.objects.filter(**invoice_filter).first()
         if invoice:
             custom.update({
-                'AmountToBePaid': invoice.amount_total
+                'AmountToBePaid': invoice.amount_total,
+                'DateDue': invoice.date_due,
+                'PaymentDate': invoice.date_payed
             })
          
         if type_of_notification == "payment_of_policy_periodic":
@@ -205,7 +198,13 @@ class NotificationDispatcher:
         #     logger.debug(f"SMS already sent for invoice {invoice.id} of policy {policy.id}, skipping.")
         #     return False 
         
-        return self.notification_client.send_notification_from_template(policy, notification_template, custom)
+        phone_number = None
+        if type_of_notification == "payment_request_for_policiy_activation_vulnerable":
+            auxiliary_contributor_with_phone = get_auxiliary_contributor_with_phone(policy.family)
+            if auxiliary_contributor_with_phone:
+                phone_number = auxiliary_contributor_with_phone.phone
+        
+        return self.notification_client.send_notification_from_template(policy, notification_template, custom, phone_number)
 
     def _get_eligible_policies(self, policies_ids, type_of_notification):
         policies = Policy.objects.filter(id__in=policies_ids)
@@ -231,21 +230,22 @@ class NotificationDispatcher:
                         PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE)
                 indication.save()
             self._create_indication_details(indication, type_of_notification, result)
-
+    
     def _create_indication_details(self, indication, type_of_notification, result):
         is_sent_successfully = bool(result) is True
-
-        # On utilise result.output seulement si result est un objet et non un booléen
+ 
         details = None
-        if not is_sent_successfully and result is not None and not isinstance(result, bool):
-            details = result.output
+        if not is_sent_successfully:
+            if isinstance(result, bool):
+                details = "Notification failed"
+            else:
+                details = result.error_message or result.output or "Unknown error"
         indication_details = IndicationOfPolicyNotificationsDetails(**{
             'indication_of_notification': indication,
             'notification_type': type_of_notification,
             'status':
                 IndicationOfPolicyNotificationsDetails.SendIndicationStatus.SENT_SUCCESSFULLY if bool(result) is True
-                else IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR,
-            # 'details': None if bool(result) or result is None else result.output
+                else IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR, 
             'details': details
         })
         indication_details.save()

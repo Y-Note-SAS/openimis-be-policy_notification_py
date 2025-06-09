@@ -34,23 +34,18 @@ msgstr ""
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:26
 msgid "policy_notification.sms_before_expiry"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s will expire on "
-"%(ExpiryDate)s. Its renewal is recommended."
+"Dear beneficiary, we would like to remind you that your contribution is still pending. "
+"If payment is not made by the deadline, your family's entitlement to benefits will be suspended."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:30
 msgid "policy_notification.sms_on_expiration"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s  expires today and it "
-"has not been renewed yet."
+"Dear beneficiary, please be informed that your family's entitlement to benefits has been suspended."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:34
 msgid "policy_notification.sms_after_expiry"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s expired on "
-"%(ExpiryDate)s and it hasn’t been renewed yet. Its renewal is recommended."
+"Dear beneficiary, to continue receiving AMG benefits, we advise you to promptly settle your contribution."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:38
 msgid "policy_notification.sms_on_renewal"
@@ -145,9 +140,9 @@ msgstr "No approval and phone number"
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
 msgstr ""
-"A policy has been created for your family/group %(InsuranceID)s - %(Name)s with the " 
-"insurance product %(ProductCode)s - %(ProductName)s. Please pay %(AmountToBePaid)s to activate it " 
-"for %(Period)s month(s)."
+"Dear beneficiary, please proceed as soon as possible with the payment "
+"of your contribution in order to maintain your eligibility for AMG benefits. "
+"For further information, please contact 0000000."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
 msgid "policy_notification.sms_request_payment_for_paamg"
@@ -159,12 +154,12 @@ msgstr ""
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:25
 msgid "policy_notification.sms_on_periodic_payment"
 msgstr ""
-"Reminder: Your contribution of %(AmountToBePaid)s for the policy of family/group " 
-"%(InsuranceID)s - %(Name)s under product %(ProductCode)s - %(ProductName)s is due."
+"Dear beneficiary, this is a reminder that the due date for your contribution "
+"payment is %(DateDue)s."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:29
 msgid "policy_notification.sms_on_periodic_payment_confirmation"
 msgstr ""
-"Confirmation: Your contribution payment of %(AmountToBePaid)s for the policy of family/group "
-"%(InsuranceID)s - %(Name)s with product %(ProductCode)s - %(ProductName)s has been processed."
+"Dear beneficiary, we are pleased to confirm the renewal of your contribution "
+"on %(PaymentDate)s."
  
