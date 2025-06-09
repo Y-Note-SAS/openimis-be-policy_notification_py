@@ -97,6 +97,7 @@ Payload:
           "reminder_after_expiration": False,
           "renewal_of_policy": False,
           "payment_request_for_policiy_activation": False,
+          "payment_request_for_policiy_activation_vulnerable": False,
           "payment_request_for_paamg": False,
           "payment_of_policy_periodic": False,
           "confirmation_of_policy_periodic_payment": False

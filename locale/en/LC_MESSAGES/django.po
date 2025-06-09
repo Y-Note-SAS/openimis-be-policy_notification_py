@@ -27,30 +27,25 @@ msgstr ""
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:22
 msgid "policy_notification.sms_on_effective"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
+"The policy for the family/group %(InsuranceID)s - %(Name)s with the " 
 "insurance product %(ProductCode)s - %(ProductName)s starts insurance "
 "coverage today and expires on %(ExpiryDate)s."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:26
 msgid "policy_notification.sms_before_expiry"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s will expire on "
-"%(ExpiryDate)s. Its renewal is recommended."
+"Dear beneficiary, we would like to remind you that your contribution is still pending. "
+"If payment is not made by the deadline, your family's entitlement to benefits will be suspended."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:30
 msgid "policy_notification.sms_on_expiration"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s  expires today and it "
-"has not been renewed yet."
+"Dear beneficiary, please be informed that your family's entitlement to benefits has been suspended."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:34
 msgid "policy_notification.sms_after_expiry"
 msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s expired on "
-"%(ExpiryDate)s and it hasn’t been renewed yet. Its renewal is recommended."
+"Dear beneficiary, to continue receiving AMG benefits, we advise you to promptly settle your contribution."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:38
 msgid "policy_notification.sms_on_renewal"
@@ -145,32 +140,26 @@ msgstr "No approval and phone number"
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
 msgstr ""
-"A policy has been created for your family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s. A payment is required to activate it. "
-"The invoice covers one month for now to ease your enrolment. Please pay as soon as possible."
+"Dear beneficiary, please proceed as soon as possible with the payment "
+"of your contribution in order to maintain your eligibility for AMG benefits. "
+"For further information, please contact 0000000."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
 msgid "policy_notification.sms_request_payment_for_paamg"
 msgstr ""
-"The PAAMG policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s has been activated "
-"from %(EffectiveDate)s to %(ExpiryDate)s. Payment has been successfully processed."
+"A PAAMG policy for the family/group %(InsuranceID)s - %(Name)s with the " 
+"insurance product %(ProductCode)s - %(ProductName)s requires payment of %(AmountToBePaid)s " 
+"for 12 months. Please process the payment."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:25
 msgid "policy_notification.sms_on_periodic_payment"
 msgstr ""
-"A periodic payment was received for the policy of family/group "
-"%(InsuranceID)s - %(Name)s under product %(ProductCode)s - %(ProductName)s. "
-"Coverage is active from %(EffectiveDate)s until %(ExpiryDate)s."
+"Dear beneficiary, this is a reminder that the due date for your contribution "
+"payment is %(DateDue)s."
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:29
 msgid "policy_notification.sms_on_periodic_payment_confirmation"
 msgstr ""
-"Confirmation: periodic payment has been processed for the policy of family/group "
-"%(InsuranceID)s - %(Name)s with insurance product %(ProductCode)s - %(ProductName)s. "
-"Policy is active from %(EffectiveDate)s to %(ExpiryDate)s."
-
-
-
-msgid "policy_notification.sms_on_policy_creation"
-msgstr "Nouvelle police créée. Veuillez régler la facture de %(amount)s."
+"Dear beneficiary, we are pleased to confirm the renewal of your contribution "
+"on %(PaymentDate)s."
+ 
