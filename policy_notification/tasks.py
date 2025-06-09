@@ -53,8 +53,11 @@ def send_notification_messages():
             if eligible_notification_types.get('payment_request_for_policiy_activation', False):
                 dispatcher.send_notification_request_payment_for_policiy_activation()
                 
-            if eligible_notification_types.get('payment_request_for_paamg', False):
-                dispatcher.send_notification_new_payment_request_for_paamg()
+            if eligible_notification_types.get('payment_request_for_policiy_activation_vulnerable', False):
+                dispatcher.send_notification_request_payment_for_policy_activation_vulnerable()
+                
+            # if eligible_notification_types.get('payment_request_for_paamg', False):
+            #     dispatcher.send_notification_new_payment_request_for_paamg()
                 
             if eligible_notification_types.get('payment_of_policy_periodic', False):
                 dispatcher.send_notification_new_periodic_payment()

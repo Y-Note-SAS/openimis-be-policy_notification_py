@@ -50,7 +50,7 @@ class DispatcherTest(TestCase):
         })
         self.test_family = self.test_insuree.family
         self.test_family.family_notification = FamilyNotification(approval_of_notification=True,
-                                                                  language_of_notification='en')
+                                                                  language_of_notification='fr')
         self.test_family.family_notification.save()
         self.test_family.save()
         self.policy = create_test_policy( 

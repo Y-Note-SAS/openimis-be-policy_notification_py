@@ -18,6 +18,10 @@ class DefaultNotificationTemplates:
         return _("policy_notification.sms_request_payment_for_activation_beneficiary")
     
     @property
+    def notification_request_payment_for_policiy_activation_vulnerable(self):
+        return _("policy_notification.sms_request_payment_for_activation_beneficiary")
+    
+    @property
     def notification_request_payment_for_paamg(self):
         return _("policy_notification.sms_request_payment_for_paamg")
     

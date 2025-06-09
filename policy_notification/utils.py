@@ -19,7 +19,7 @@ def get_default_notification_data():
 
 def validate_family_notification_data(data):
     approval = data.get('approvalOfNotification', False)
-    language_of_notification = data.get('languageOfNotification', 'en')
+    language_of_notification = data.get('languageOfNotification', 'fr')
 
     if not isinstance(approval, bool):
         raise ValidationError(F"approvalOfNotification has to be boolean, not {type(approval)}")
@@ -66,6 +66,14 @@ def get_family_member_with_phone(family):
         return query.first()
     else:
         return None
+    
+def get_auxiliary_contributor_with_phone(family):
+    """
+    Récupère le chef de la famille parente (s'il existe) avec un numéro de téléphone.
+    """
+    if family.parent and family.parent.head_insuree.phone and family.parent.head_insuree.phone.strip():
+        return family.parent.head_insuree 
+    return None
 
 
 def get_notification_indication_filter(notification_type):
