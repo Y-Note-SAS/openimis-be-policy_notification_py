@@ -411,8 +411,8 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         # Récupère les nouvelles policies à l’état IDLE 
         new_policies = NotificationTriggerEventDetectors.__get_all_new_policies()
 
-        # Au moins une valeur > 0
-        at_least_one_positive = (
+        # Au moins une valeur pour l'assuré > 0
+        at_least_one_positive_for_insuree = (
             Q(contribution_plan__json_ext__calculation_rule__lumpsum__isnull=False) &
             ~Q(contribution_plan__json_ext__calculation_rule__lumpsum="0")
         ) | (
@@ -426,20 +426,23 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
             ~Q(contribution_plan__json_ext__calculation_rule__adultfemalesum="0")
         )
 
-        # Au moins une valeur vide ou 0
-        at_least_one_missing_or_zero = (
-            Q(contribution_plan__json_ext__calculation_rule__lumpsum__isnull=True) |
-            Q(contribution_plan__json_ext__calculation_rule__lumpsum="0") |
-            Q(contribution_plan__json_ext__calculation_rule__childsum__isnull=True) |
-            Q(contribution_plan__json_ext__calculation_rule__childsum="0") |
-            Q(contribution_plan__json_ext__calculation_rule__adultmalesum__isnull=True) |
-            Q(contribution_plan__json_ext__calculation_rule__adultmalesum="0") |
-            Q(contribution_plan__json_ext__calculation_rule__adultfemalesum__isnull=True) |
-            Q(contribution_plan__json_ext__calculation_rule__adultfemalesum="0")
+        # Au moins une valeur pour l'Etat > 0
+        at_least_one_positive_for_government = (
+            Q(contribution_plan__json_ext__calculation_rule__governmentlumpsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentlumpsum="0")
+        ) | (
+            Q(contribution_plan__json_ext__calculation_rule__governmentchildsum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentchildsum="0")
+        ) | (
+            Q(contribution_plan__json_ext__calculation_rule__governmentadultmalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentadultmalesum="0")
+        ) | (
+            Q(contribution_plan__json_ext__calculation_rule__governmentadultfemalesum__isnull=False) &
+            ~Q(contribution_plan__json_ext__calculation_rule__governmentadultfemalesum="0")
         )
 
         beneficiary_policies = new_policies.filter(
-            at_least_one_positive & at_least_one_missing_or_zero
+            at_least_one_positive_for_insuree & at_least_one_positive_for_government
         )
 
         print(f"we are in the all_new_policies_needing_payment_vulnerable with policies {beneficiary_policies}")
