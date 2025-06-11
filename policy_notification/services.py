@@ -64,8 +64,8 @@ def update_family_notification_policy(family_uuid: str, updated_family_notificat
         # create default family SMS policy
         current_family_notification = create_family_notification_policy(family_uuid)
 
-    updated_approval = updated_family_notification_fields.get('approvalOfNotification', None)
-    updated_language = updated_family_notification_fields.get('languageOfNotification', None)
+    updated_approval = updated_family_notification_fields.get('approvalOfNotification', True)
+    updated_language = updated_family_notification_fields.get('languageOfNotification', 'fr_KM')
 
     if updated_approval is not None:
         current_family_notification.approval_of_notification = updated_approval
