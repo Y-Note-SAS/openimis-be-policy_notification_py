@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 def get_default_notification_data():
     return {
-        'approvalOfNotification': False,
-        'languageOfNotification': get_first_or_default_language().code
+        'approvalOfNotification': True,
+        'languageOfNotification': 'fr_KM'
     }
 
 
 def validate_family_notification_data(data):
-    approval = data.get('approvalOfNotification', False)
-    language_of_notification = data.get('languageOfNotification', 'fr')
+    approval = data.get('approvalOfNotification', True)
+    language_of_notification = data.get('languageOfNotification', 'fr_KM')
 
     if not isinstance(approval, bool):
         raise ValidationError(F"approvalOfNotification has to be boolean, not {type(approval)}")

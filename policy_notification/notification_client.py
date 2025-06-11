@@ -30,7 +30,8 @@ class PolicyNotificationClient:
                     gateway_output=None, success=False, error_message=_("Family without phone number assigned")
                 )
 
-        current_language = translation.get_language()
+        current_language = 'fr_KM'
+        # translation.get_language()
         try:
             translation.activate(policy.family.family_notification.language_of_notification)
             custom = template_customs
