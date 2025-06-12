@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 def get_default_notification_data():
     return {
-        'approvalOfNotification': False,
-        'languageOfNotification': get_first_or_default_language().code
+        'approvalOfNotification': True,
+        'languageOfNotification': 'fr_KM'
     }
 
 
 def validate_family_notification_data(data):
-    approval = data.get('approvalOfNotification', False)
-    language_of_notification = data.get('languageOfNotification', 'fr')
+    approval = data.get('approvalOfNotification', True)
+    language_of_notification = data.get('languageOfNotification', 'fr_KM')
 
     if not isinstance(approval, bool):
         raise ValidationError(F"approvalOfNotification has to be boolean, not {type(approval)}")
@@ -97,7 +97,8 @@ def get_notification_indication_filter(notification_type):
         # Confirm that for given policy notification was not sent, or was sent with error
         indication_not_exit = Q(indication_of_notifications__isnull=True)
         indication_not_sent = __notification_not_sent_filter(type_of_notification)
-        indication_failed = __notification_failed_filter(type_of_notification)
-        return indication_not_exit | indication_not_sent | indication_failed
+        # indication_failed = __notification_failed_filter(type_of_notification)
+        return indication_not_exit | indication_not_sent 
+    # | indication_failed
 
     return __indication_filter(notification_type)
