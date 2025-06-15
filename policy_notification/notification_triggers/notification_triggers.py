@@ -68,7 +68,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
 
         expiry_date = datetime.now().date() \
                           - timedelta(days=cls.REMINDER_AFTER_EXPIRY_DAYS)
-        ids = NotificationTriggerEventDetectors.policies_expiring_without_renewal(expiry_date)
+        ids = NotificationTriggerEventDetectors.policies_expiring_without_renewal(expiry_date, notificatio_type = "reminder_after_expiration")
         return ids
     
     @classmethod
@@ -249,7 +249,7 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
         return policy_queryset.values(*columns)
 
     @classmethod
-    def policies_expiring_without_renewal(cls, expiry_date, notificatio_type="expiration_of_policy"):
+    def policies_expiring_without_renewal(cls, expiry_date, notificatio_type="reminder_after_expiration"):
         renewal_date = expiry_date + timedelta(days=1)
 
         expiring = Policy.objects\
@@ -270,11 +270,11 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
                 
             
                 
-        if notificatio_type == "need_for_renewal":
+        if notificatio_type == "reminder_after_expiration":
             
             """
             Filtrer les polices qui :
-            - Ont reçu moins de 8 SMS need_for_renewal entre expiry_date et expiry_date + 60 jours
+            - Ont reçu moins de 8 SMS reminder_after_expiration entre expiry_date et expiry_date + 60 jours
             - N'ont pas reçu de SMS dans les 7 derniers jours
             """
             now_dt = timezone.now()
@@ -309,11 +309,11 @@ class NotificationTriggerEventDetectors(NotificationTriggerAbs):
                 ) &
                 (
                     Q(indication_of_notifications__isnull=True) |
-                    Q(indication_of_notifications__need_for_renewal__isnull=True) 
+                    Q(indication_of_notifications__reminder_after_expiration__isnull=True) 
                     # |
                     # (
-                    #     Q(indication_of_notifications__need_for_renewal=PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
-                    #     Q(indication_of_notifications__details__notification_type='need_for_renewal') &
+                    #     Q(indication_of_notifications__reminder_after_expiration=PolicyNotificationConfig.UNSUCCESSFUL_NOTIFICATION_ATTEMPT_DATE) &
+                    #     Q(indication_of_notifications__details__notification_type='reminder_after_expiration') &
                     #     Q(indication_of_notifications__details__status=IndicationOfPolicyNotificationsDetails.SendIndicationStatus.NOT_SENT_DUE_TO_ERROR)
                     # )
                 )
