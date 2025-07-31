@@ -24,15 +24,15 @@ def on_family_create_mutation(mutation_args):
         family_uuid = Family.objects.get(head_insuree=head_of_family, validity_to__isnull=True).uuid
         if not family_uuid:
             return []
+        family_notification_policy = mutation_args['data'].get('contribution', {}).get('PolicyNotification', {})
+        create_family_notification_policy(family_uuid, family_notification_policy)
+        
     except (Family.DoesNotExist, Insuree.DoesNotExist) as e:
         logger.warning(F"Family with head insuree with chf {head_of_family_chf} not found, FamilyNotification was not created")
     except Exception as e:
         import traceback
         logger.error("Error ocurred during creating new familySMS, traceback: ")
         traceback.print_exc()
-
-    family_notification_policy = mutation_args['data'].get('contribution', {}).get('PolicyNotification', {})
-    create_family_notification_policy(family_uuid, family_notification_policy)
     return []
 
 
