@@ -19,8 +19,8 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:18
 msgid "policy_notification.sms_on_activation"
-msgstr ""
-"Cher assuré(e), nous avons le plaisir de confirmer le paiement de votre cotisation."
+"AMG: vos droits sont ouverts. avec votre code %(InsuranceID)s, accédez aux soins dans les "
+"hôpitaux agréés. Merci pour votre confiance. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:22
 msgid "policy_notification.sms_on_effective"
@@ -31,15 +31,14 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:26
 msgid "policy_notification.sms_before_expiry"
-msgstr ""
-"Cher assuré(e), nous vous informons que nos services sont toujours en attente "
-"du règlement de votre cotisation. Passé le délai prévu, le droit de "
-"votre famille aux prestations sera suspendu."
+"AMG: cotisation %(AmountToBePaid)s kmf (code %(InsuranceID)s) impayée. "
+"Payez pour rester couvert. "
+"MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:30
 msgid "policy_notification.sms_on_expiration"
-msgstr ""
-"Cher assuré(e), nous vous informons que le droit de votre famille aux prestations est suspendu."
+"AMG: droit aux soins fermé (cotisation impayée). payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) "
+"via MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:34
 msgid "policy_notification.sms_after_expiry"
@@ -137,10 +136,8 @@ msgstr "Aucune approbation ni numéro de téléphone"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
-msgstr ""
-"Cher assuré, prière de procéder le plus rapidement possible au règlement "
-"de votre cotisation en vue de garder votre droit ouvert aux prestations de l’AMG. "
-"Pour toute information complémentaire, contactez 000000000."
+"AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
+"MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
 msgid "policy_notification.sms_request_payment_for_paamg"

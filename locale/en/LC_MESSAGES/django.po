@@ -19,10 +19,8 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:18
 msgid "policy_notification.sms_on_activation"
-msgstr ""
-"The policy for the family/group %(InsuranceID)s - %(Name)s with the "
-"insurance product %(ProductCode)s - %(ProductName)s has been activated from "
-"the date %(EffectiveDate)s until the expiry date %(ExpiryDate)s."
+msgstr "AMG: Coverage active. Use code %(InsuranceID)s to access care "
+"at approved hospitals. Thank you. Info: 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:22
 msgid "policy_notification.sms_on_effective"
@@ -33,14 +31,13 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:26
 msgid "policy_notification.sms_before_expiry"
-msgstr ""
-"Dear beneficiary, we would like to remind you that your contribution is still pending. "
-"If payment is not made by the deadline, your family's entitlement to benefits will be suspended."
+msgstr "AMG: Unpaid fee %(AmountToBePaid)s kmf (code %(InsuranceID)s). "
+"Pay to stay covered. MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s#. Info: 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:30
 msgid "policy_notification.sms_on_expiration"
-msgstr ""
-"Dear beneficiary, please be informed that your family's entitlement to benefits has been suspended."
+msgstr "AMG: Coverage closed (unpaid fee). Pay %(AmountToBePaid)s kmf (code %(InsuranceID)s) "
+"via MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s#. Info: 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:34
 msgid "policy_notification.sms_after_expiry"
@@ -139,10 +136,8 @@ msgstr "No approval and phone number"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
-msgstr ""
-"Dear beneficiary, please proceed as soon as possible with the payment "
-"of your contribution in order to maintain your eligibility for AMG benefits. "
-"For further information, please contact 0000000."
+msgstr "AMG: Pay %(AmountToBePaid)s kmf (code %(InsuranceID)s) to activate coverage. "
+"MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s#. Info: 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
 msgid "policy_notification.sms_request_payment_for_paamg"
