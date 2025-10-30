@@ -19,7 +19,7 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:18
 msgid "policy_notification.sms_on_activation"
-"AMG: vos droits sont ouverts. avec votre code %(InsuranceID)s, accédez aux soins dans les "
+msgstr "AMG: vos droits sont ouverts. avec votre code %(InsuranceID)s, accédez aux soins dans les "
 "hôpitaux agréés. Merci pour votre confiance. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:22
@@ -31,13 +31,13 @@ msgstr ""
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:26
 msgid "policy_notification.sms_before_expiry"
-"AMG: cotisation %(AmountToBePaid)s kmf (code %(InsuranceID)s) impayée. "
+msgstr "AMG: cotisation %(AmountToBePaid)s kmf (code %(InsuranceID)s) impayée. "
 "Payez pour rester couvert. "
 "MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:30
 msgid "policy_notification.sms_on_expiration"
-"AMG: droit aux soins fermé (cotisation impayée). payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) "
+msgstr "AMG: droit aux soins fermé (cotisation impayée). payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) "
 "via MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:34
@@ -136,7 +136,7 @@ msgstr "Aucune approbation ni numéro de téléphone"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
-"AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
+msgstr "AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
 "MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
