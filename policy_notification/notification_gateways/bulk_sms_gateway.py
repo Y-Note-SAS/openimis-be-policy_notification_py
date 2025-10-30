@@ -44,7 +44,6 @@ class BulkSMSGateway(NotificationGatewayAbs):
         s = requests.Session()
         response = s.send(request)
         success = self._check_success(response)
-        response = self._check_success(response)
         logger.info(f"BulkSMS request success: {success} "
                     f"With response: {response.content}")
         if not success:
