@@ -44,7 +44,9 @@ class BulkSMSGateway(NotificationGatewayAbs):
         s = requests.Session()
         response = s.send(request)
         success = self._check_success(response)
-        logger.info(f'BulkSMS request success: {success}')
+        response = self._check_success(response)
+        logger.info(f"BulkSMS request success: {success} "
+                    f"With response: {response.content}")
         if not success:
             if response is not None:
                 logger.warning(f"BulkSMS Gateway: Notification request sent, resulted in "
@@ -60,14 +62,14 @@ class BulkSMSGateway(NotificationGatewayAbs):
     def get_headers(self):
         header_keys = self.get_provider_config_param('HeaderKeys')
         header_values = self.get_provider_config_param('HeaderValues')
-        base_headers = {'Content-Type': 'multipart/form-data; charset=utf-8'}
+        base_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         if header_keys and header_values:
             header_dict = dict(zip(header_keys.split(','), header_values.split(',')))
             base_headers.update(header_dict)
         return base_headers
 
     def get_method(self):
-        return 'GET'
+        return 'POST'
     
     def get_request_content(self):
         return json.dumps({
