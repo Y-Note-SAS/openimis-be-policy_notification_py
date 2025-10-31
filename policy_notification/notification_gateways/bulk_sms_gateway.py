@@ -72,8 +72,9 @@ class BulkSMSGateway(NotificationGatewayAbs):
     
     def get_request_content(self):
         return json.dumps({
-            'data': self._get_message_content(self.message_sent),
-            'datetime': self.sending_time.strftime('%Y-%m-%d %H:%M:%S')
+            'from': self.get_provider_config_param('SenderId'),
+            'phone_number': self.family_number,
+            'content': self.message_sent
         }, separators=(',', ':'))
 
     def get_request_url(self):
