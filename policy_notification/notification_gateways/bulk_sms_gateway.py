@@ -9,6 +9,7 @@ from policy_notification.notification_gateways.abstract_sms_gateway import Notif
 from policy_notification.notification_gateways.RequestBuilders import BaseSMSBuilder
 from urllib.parse import urlencode, parse_qs
 
+
 logger = logging.getLogger(__name__)
 
 class BulkSMSGateway(NotificationGatewayAbs):
@@ -73,6 +74,7 @@ class BulkSMSGateway(NotificationGatewayAbs):
             logger.info(f"BulkSMS request success: {success} "
                         f"With response: {response.content}")
         else:
+
             if response is not None:
                 logger.warning(f"BulkSMS Gateway: Notification request sent, resulted in "
                                f"status {response.status_code}, "
@@ -98,7 +100,9 @@ class BulkSMSGateway(NotificationGatewayAbs):
     
     def get_request_content(self):
         params = {
+
             'from': self.get_provider_config_param('SenderId'),
+
             'phone_number': self.family_number,
             'content': self.message_sent
         }
