@@ -7,6 +7,7 @@ import hmac
 import hashlib
 from policy_notification.notification_gateways.abstract_sms_gateway import NotificationGatewayAbs, NotificationSendingResult
 from policy_notification.notification_gateways.RequestBuilders import BaseSMSBuilder
+from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
 
@@ -71,11 +72,12 @@ class BulkSMSGateway(NotificationGatewayAbs):
         return 'POST'
     
     def get_request_content(self):
-        return json.dumps({
-            'from': self.get_provider_config_param('SenderId'),
+        params = {
+            'from': "Openimis",
             'phone_number': self.family_number,
             'content': self.message_sent
-        }, separators=(',', ':'))
+        }
+        return urlencode(params)
 
     def get_request_url(self):
         return self.get_provider_config_param('GateUrl')
