@@ -7,6 +7,8 @@ import hmac
 import hashlib
 from policy_notification.notification_gateways.abstract_sms_gateway import NotificationGatewayAbs, NotificationSendingResult
 from policy_notification.notification_gateways.RequestBuilders import BaseSMSBuilder
+from urllib.parse import urlencode, parse_qs
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +43,38 @@ class BulkSMSGateway(NotificationGatewayAbs):
         self.family_number = family_number
         builder = builder or self.builder
         request = self.build_request(builder)
-        s = requests.Session()
-        response = s.send(request)
-        success = self._check_success(response)
-        logger.info(f'BulkSMS request success: {success}')
-        if not success:
+        
+        # Extraction message et numéro pour logging, avant envoi
+        message_to_send = ""
+        phone_number_to_send = ""
+        if request.body:
+            try:
+                body_str = request.body.decode() if isinstance(request.body, bytes) else request.body
+                parsed_body = parse_qs(body_str)
+                if "content" in parsed_body:
+                    message_to_send = parsed_body["content"][0]
+                if "phone_number" in parsed_body:
+                    phone_number_to_send = parsed_body["phone_number"][0]
+            except Exception as e:
+                logger.warning(f"Impossible de parser le body de la query: {e}")
+
+        logger.info(f"We send the message: {message_to_send} to {phone_number_to_send}")
+        
+        # Envoi
+        try:
+            s = requests.Session()
+            response = s.send(request)
+            success = self._check_success(response)
+        except Exception as e:
+            logger.error(f"Erreur lors de l'envoi de la requête BulkSMS: {e}")
+            return NotificationSendingResult(None, success=False)
+        
+        # Logs du résultat
+        if success:
+            logger.info(f"BulkSMS request success: {success} "
+                        f"With response: {response.content}")
+        else:
+
             if response is not None:
                 logger.warning(f"BulkSMS Gateway: Notification request sent, resulted in "
                                f"status {response.status_code}, "
@@ -60,20 +89,24 @@ class BulkSMSGateway(NotificationGatewayAbs):
     def get_headers(self):
         header_keys = self.get_provider_config_param('HeaderKeys')
         header_values = self.get_provider_config_param('HeaderValues')
-        base_headers = {'Content-Type': 'multipart/form-data; charset=utf-8'}
+        base_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         if header_keys and header_values:
             header_dict = dict(zip(header_keys.split(','), header_values.split(',')))
             base_headers.update(header_dict)
         return base_headers
 
     def get_method(self):
-        return 'GET'
+        return 'POST'
     
     def get_request_content(self):
-        return json.dumps({
-            'data': self._get_message_content(self.message_sent),
-            'datetime': self.sending_time.strftime('%Y-%m-%d %H:%M:%S')
-        }, separators=(',', ':'))
+        params = {
+
+            'from': self.get_provider_config_param('SenderId'),
+
+            'phone_number': self.family_number,
+            'content': self.message_sent
+        }
+        return urlencode(params)
 
     def get_request_url(self):
         return self.get_provider_config_param('GateUrl')
