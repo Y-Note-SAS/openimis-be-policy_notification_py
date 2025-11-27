@@ -127,7 +127,8 @@ class NotificationDispatcher:
             'ProductName': policy.product.name,
             'AmountToBePaid': policy_values(policy, policy.family, policy, user)[0].value,
             'DateDue': policy.expiry_date,
-            'PaymentDate': policy.expiry_date
+            'PaymentDate': policy.expiry_date,
+            'PolicyUuid':policy.uuid,
         }
         return customs
 
