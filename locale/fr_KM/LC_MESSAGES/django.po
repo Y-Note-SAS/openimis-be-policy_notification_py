@@ -136,8 +136,9 @@ msgstr "Aucune approbation ni numéro de téléphone"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
+msgstr ""
 "holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimisRef=%(InsuranceID)s&policyUuid=%(PolicyUuid)s"
-msgstr "AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
+"AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
 "MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
