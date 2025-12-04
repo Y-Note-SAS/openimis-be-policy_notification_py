@@ -147,12 +147,16 @@ msgstr ""
 "A PAAMG policy for the family/group %(InsuranceID)s - %(Name)s with the " 
 "insurance product %(ProductCode)s - %(ProductName)s requires payment of %(AmountToBePaid)s " 
 "for 12 months. Please process the payment."
+"holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimis_ref=%(InsuranceID)s&policy_uuid=%(PolicyUuid)s"
+
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:25
 msgid "policy_notification.sms_on_periodic_payment"
 msgstr ""
 "Dear beneficiary, this is a reminder that the due date for your contribution "
 "payment is %(DateDue)s."
+"holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimis_ref=%(InsuranceID)s&policy_uuid=%(PolicyUuid)s"
+
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:29
 msgid "policy_notification.sms_on_periodic_payment_confirmation"
