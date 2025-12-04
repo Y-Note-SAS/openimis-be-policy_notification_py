@@ -136,19 +136,24 @@ msgstr "Aucune approbation ni numéro de téléphone"
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:17
 msgid "policy_notification.sms_request_payment_for_activation_beneficiary"
+"holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimis_ref=%(InsuranceID)s&policy_uuid=%(PolicyUuid)s"
 msgstr "AMG: payez %(AmountToBePaid)s kmf (code %(InsuranceID)s) pour activer votre couverture. "
 "MVola #4441514010318*%(AmountToBePaid)s*%(InsuranceID)s# ou bdc 10380750002. infos 7332135"
+
 
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:21
 msgid "policy_notification.sms_request_payment_for_paamg"
 msgstr ""
+"holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimis_ref=%(InsuranceID)s&policy_uuid=%(PolicyUuid)s"
 "Une police PAAMG pour la famille/groupe %(InsuranceID)s - %(Name)s avec le "
 "produit d'assurance %(ProductCode)s - %(ProductName)s nécessite un paiement de "
 "%(AmountToBePaid)s pour 12 mois. Veuillez effectuer le paiement."
 
+
 #: policy_notification/notification_templates/DefaultNotificationTemplates.py:25
 msgid "policy_notification.sms_on_periodic_payment"
 msgstr ""
+"holo https://dev.amg.km/amg-pay/payments/initier-paiement?amount=%(AmountToBePaid)s&openimis_ref=%(InsuranceID)s&policy_uuid=%(PolicyUuid)s"
 "Cher assuré, nous vous rappelons que la date limite pour le paiement "
 "de votre cotisation est le %(DateDue)s."
 
