@@ -8,7 +8,7 @@ def schedule_tasks(scheduler: BackgroundScheduler):
         send_notification_messages,
         trigger=CronTrigger(
             day_of_week='*',
-            hour='9-20',
+            hour='6-22',
             minute='*/5'
         ),
         id="openimis_notification_batch",
