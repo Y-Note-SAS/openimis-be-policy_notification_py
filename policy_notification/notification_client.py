@@ -24,23 +24,25 @@ class PolicyNotificationClient:
             if family_member_with_phone:
                 phone = family_member_with_phone.phone
             else:
-                logger.error(F"Failed to send notification for family with head {policy.family.head_insuree}, "
-                             F"insuree doesn't have assigned phone number")
+                logger.error(
+                    f"Failed to send notification for family with head {policy.family.head_insuree}, "
+                    f"insuree doesn't have assigned phone number"
+                )
                 return NotificationSendingResult(
-                    gateway_output=None, success=False, error_message=_("Family without phone number assigned")
+                    gateway_output=None,
+                    success=False,
+                    error_message=_("Family without phone number assigned"),
                 )
 
-        current_language = 'fr_KM'
-        # translation.get_language()
+        old_language = translation.get_language()
         try:
             translation.activate(policy.family.family_notification.language_of_notification)
             custom = template_customs
             message = notification_template % custom
             print(f"We send the message: {message} to {phone}")
             return self.provider.send_notification(message, family_number=phone)
-
         except Exception as e:
             logger.error(f"Failed to send notification for policy {policy}, error: {e}")
-            return NotificationSendingResult(gateway_output=None, success=False, error_message=e)
+            return NotificationSendingResult(gateway_output=None, success=False, error_message=str(e))
         finally:
-            translation.activate(current_language)
+            translation.activate(old_language)
