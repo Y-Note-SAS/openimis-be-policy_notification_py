@@ -12,6 +12,8 @@ from .utils import get_notification_providers
 
 @shared_task
 def send_notification_messages():
+    from django.utils import translation
+    translation.activate('fr_KM')
     logger = logging.getLogger(__name__)
     try:
         print(f"we are in the target sms method")
